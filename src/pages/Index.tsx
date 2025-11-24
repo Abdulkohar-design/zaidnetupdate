@@ -124,6 +124,7 @@ function Index() {
         name: item.name,
         amount: Number(item.amount),
         status: item.status as 'paid' | 'pending',
+        paymentMethod: item.paymentMethod || 'cash', // Default to cash for old data
         created_at: item.created_at,
         notes: item.notes || '',
         due_date: item.due_date,

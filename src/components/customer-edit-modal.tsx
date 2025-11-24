@@ -25,7 +25,10 @@ export function CustomerEditModal({ customer, isOpen, onClose, onSave }: Custome
 
   useEffect(() => {
     if (customer) {
-      setFormData({ ...customer });
+      setFormData({
+        ...customer,
+        paymentMethod: customer.paymentMethod || 'cash' // Default to cash if not set
+      });
     }
   }, [customer]);
 

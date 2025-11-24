@@ -17,7 +17,8 @@ import { NameEditModal } from "@/components/name-edit-modal";
 import { PasswordEditModal } from "@/components/password-edit-modal"; // ✅ Import komponen baru
 import { BillingExport } from "@/components/billing-export";
 import { FeatureInfo } from "@/components/feature-info";
-import { PackageManagement } from "@/components/package-management";
+import { InternetPackageSettings } from "@/components/internet-package-settings";
+import { PaymentHistoryView } from "@/components/payment-history-view";
 import { PaymentFilter } from "@/components/payment-filter";
 import { PaymentStatusFilter } from "@/components/payment-status-filter";
 import { BillingCharts } from "@/components/billing-charts";
@@ -388,20 +389,21 @@ function Index() {
 
       <main className="flex-1 overflow-auto p-2 sm:p-4">
         <FeatureInfo />
-        
+
         <Tabs defaultValue="dashboard" className="mt-4 sm:mt-6">
-          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-9 gap-1 sm:gap-2 h-auto">
+          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-10 gap-1 sm:gap-2 h-auto">
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2">Dashboard</TabsTrigger>
             <TabsTrigger value="customers" className="text-xs sm:text-sm py-2">Data Pelanggan</TabsTrigger>
             <TabsTrigger value="packages" className="text-xs sm:text-sm py-2">Paket Internet</TabsTrigger>
             <TabsTrigger value="payments" className="text-xs sm:text-sm py-2">Pembayaran</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm py-2">Riwayat</TabsTrigger>
             <TabsTrigger value="charts" className="text-xs sm:text-sm py-2">Grafik</TabsTrigger>
             <TabsTrigger value="overdue" className="text-xs sm:text-sm py-2">Tunggakan</TabsTrigger>
             <TabsTrigger value="map" className="text-xs sm:text-sm py-2">Map</TabsTrigger>
             <TabsTrigger value="template" className="text-xs sm:text-sm py-2">Template</TabsTrigger>
             <TabsTrigger value="users" className="text-xs sm:text-sm py-2">Setting</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="dashboard" className="space-y-4 mt-4">
             <BillingStatsComponent stats={stats} />
             <Separator className="my-4" />
@@ -419,7 +421,7 @@ function Index() {
               />
             </div>
           </TabsContent>
-          
+
           <TabsContent value="customers" className="space-y-4 mt-4">
             <PaymentStatusFilter customers={customers} onFilterChange={handleFilterChange} />
             <CustomerList
@@ -433,13 +435,17 @@ function Index() {
               onDeleteSelected={handleDeleteSelected}
             />
           </TabsContent>
-          
+
           <TabsContent value="packages" className="space-y-4 mt-4">
-            <PackageManagement />
+            <InternetPackageSettings />
           </TabsContent>
-          
+
           <TabsContent value="payments" className="space-y-4 mt-4">
             <PaymentFilter customers={customers} />
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4 mt-4">
+            <PaymentHistoryView />
           </TabsContent>
 
           <TabsContent value="charts" className="space-y-4 mt-4">

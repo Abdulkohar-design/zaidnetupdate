@@ -13,20 +13,24 @@ export function BillingCharts({ customers }: BillingChartsProps) {
     // Generate data for the last 12 months
     const months = [];
     const now = new Date();
-    
+
     for (let i = 11; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
-      
+
       // Filter customers for this month
       const monthCustomers = customers.filter(customer => {
         const customerDate = new Date(customer.created_at);
-        return customerDate.getMonth() === date.getMonth() && 
-               customerDate.getFullYear() === date.getFullYear();
+        return customerDate.getMonth() === date.getMonth() &&
+          customerDate.getFullYear() === date.getFullYear();
       });
 
       const paidCustomers = monthCustomers.filter(c => c.status === 'paid');
       const unpaidCustomers = monthCustomers.filter(c => c.status === 'pending');
+
+      const bayarTunai = paidCustomers.filter(c => c.paymentMethod === 'cash' || !c.paymentMethod).length;
+      const bayarTransfer = paidCustomers.filter(c => c.paymentMethod === 'transfer').length;
+
       const totalPaidAmount = paidCustomers.reduce((sum, c) => sum + c.amount, 0);
       const totalUnpaidAmount = unpaidCustomers.reduce((sum, c) => sum + c.amount, 0);
 
@@ -34,12 +38,14 @@ export function BillingCharts({ customers }: BillingChartsProps) {
         month: monthName,
         pelangganBayar: paidCustomers.length,
         pelangganBelumBayar: unpaidCustomers.length,
+        bayarTunai,
+        bayarTransfer,
         jumlahPembayaran: totalPaidAmount,
         tagihan: totalUnpaidAmount,
         totalPelanggan: monthCustomers.length
       });
     }
-    
+
     return months;
   }, [customers]);
 
@@ -52,17 +58,17 @@ export function BillingCharts({ customers }: BillingChartsProps) {
   };
 
   const paymentTrend = getTrendPercentage(
-    currentMonthData?.pelangganBayar || 0, 
+    currentMonthData?.pelangganBayar || 0,
     previousMonthData?.pelangganBayar || 0
   );
 
   const unpaidTrend = getTrendPercentage(
-    currentMonthData?.pelangganBelumBayar || 0, 
+    currentMonthData?.pelangganBelumBayar || 0,
     previousMonthData?.pelangganBelumBayar || 0
   );
 
   const revenueTrend = getTrendPercentage(
-    currentMonthData?.jumlahPembayaran || 0, 
+    currentMonthData?.jumlahPembayaran || 0,
     previousMonthData?.jumlahPembayaran || 0
   );
 
@@ -74,7 +80,7 @@ export function BillingCharts({ customers }: BillingChartsProps) {
       color: '#22c55e'
     },
     {
-      name: 'Belum Bayar', 
+      name: 'Belum Bayar',
       value: currentMonthData?.pelangganBelumBayar || 0,
       color: '#ef4444'
     }
@@ -95,8 +101,8 @@ export function BillingCharts({ customers }: BillingChartsProps) {
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{currentMonthData?.pelangganBayar || 0}</div>
             <p className="text-xs text-muted-foreground">
-              <span className={`${parseFloat(paymentTrend) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {parseFloat(paymentTrend) >= 0 ? '+' : ''}{paymentTrend}%
+              <span className={`${Number(paymentTrend) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {Number(paymentTrend) >= 0 ? '+' : ''}{paymentTrend}%
               </span> dari bulan lalu
             </p>
           </CardContent>
@@ -110,8 +116,8 @@ export function BillingCharts({ customers }: BillingChartsProps) {
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{currentMonthData?.pelangganBelumBayar || 0}</div>
             <p className="text-xs text-muted-foreground">
-              <span className={`${parseFloat(unpaidTrend) <= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {parseFloat(unpaidTrend) >= 0 ? '+' : ''}{unpaidTrend}%
+              <span className={`${Number(unpaidTrend) <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {Number(unpaidTrend) >= 0 ? '+' : ''}{unpaidTrend}%
               </span> dari bulan lalu
             </p>
           </CardContent>
@@ -127,8 +133,8 @@ export function BillingCharts({ customers }: BillingChartsProps) {
               {formatCurrency(currentMonthData?.jumlahPembayaran || 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              <span className={`${parseFloat(revenueTrend) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {parseFloat(revenueTrend) >= 0 ? '+' : ''}{revenueTrend}%
+              <span className={`${Number(revenueTrend) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {Number(revenueTrend) >= 0 ? '+' : ''}{revenueTrend}%
               </span> dari bulan lalu
             </p>
           </CardContent>
@@ -172,13 +178,17 @@ export function BillingCharts({ customers }: BillingChartsProps) {
         {/* Pie Chart - Status Pembayaran Bulan Ini */}
         <Card>
           <CardHeader>
-            <CardTitle>Status Pembayaran Bulan Ini</CardTitle>
+            <CardTitle>Metode Pembayaran Bulan Ini</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={pieData}
+                  data={[
+                    { name: 'Tunai', value: currentMonthData?.bayarTunai || 0, color: '#22c55e' },
+                    { name: 'Transfer', value: currentMonthData?.bayarTransfer || 0, color: '#8b5cf6' },
+                    { name: 'Belum Bayar', value: currentMonthData?.pelangganBelumBayar || 0, color: '#ef4444' }
+                  ]}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -187,11 +197,16 @@ export function BillingCharts({ customers }: BillingChartsProps) {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {pieData.map((entry, index) => (
+                  {[
+                    { name: 'Tunai', value: currentMonthData?.bayarTunai || 0, color: '#22c55e' },
+                    { name: 'Transfer', value: currentMonthData?.bayarTransfer || 0, color: '#8b5cf6' },
+                    { name: 'Belum Bayar', value: currentMonthData?.pelangganBelumBayar || 0, color: '#ef4444' }
+                  ].map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -210,10 +225,10 @@ export function BillingCharts({ customers }: BillingChartsProps) {
                 <YAxis />
                 <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="jumlahPembayaran" 
-                  stroke="#2563eb" 
+                <Line
+                  type="monotone"
+                  dataKey="jumlahPembayaran"
+                  stroke="#2563eb"
                   strokeWidth={2}
                   name="Pembayaran Masuk"
                 />

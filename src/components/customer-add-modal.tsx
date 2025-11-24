@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CustomerBill } from "@/types/wifi-billing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhotoUpload } from "./photo-upload";
 import { LocationPicker } from "./location-picker";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,29 @@ export function CustomerAddModal({ isOpen, onClose, onAdd }: CustomerAddModalPro
     longitude: undefined
   });
 
+  const [packages, setPackages] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      const { data } = await supabase.from('internet_packages').select('*');
+      if (data) setPackages(data);
+    };
+    fetchPackages();
+  }, []);
+
+  const handlePackageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedPkg = packages.find(p => p.name === e.target.value);
+    if (selectedPkg) {
+      setFormData({
+        ...formData,
+        package_name: selectedPkg.name,
+        amount: selectedPkg.price
+      });
+    } else {
+      setFormData({ ...formData, package_name: e.target.value });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd({
@@ -58,6 +82,30 @@ export function CustomerAddModal({ isOpen, onClose, onAdd }: CustomerAddModalPro
               required
             />
           </div>
+
+          <div>
+            <Label>Paket Internet</Label>
+            <select
+              className="w-full p-2 border rounded-md mb-2"
+              value={formData.package_name}
+              onChange={handlePackageChange}
+            >
+              <option value="">-- Pilih Paket --</option>
+              {packages.map(pkg => (
+                <option key={pkg.id} value={pkg.name}>
+                  {pkg.name} - {pkg.speed} (Rp {pkg.price.toLocaleString()})
+                </option>
+              ))}
+              <option value="custom">Manual / Custom</option>
+            </select>
+            {formData.package_name === 'custom' && (
+              <Input
+                placeholder="Nama paket manual"
+                onChange={(e) => setFormData({ ...formData, package_name: e.target.value })}
+              />
+            )}
+          </div>
+
           <div>
             <Label>Nominal Tagihan (Rp)</Label>
             <Input
@@ -106,14 +154,7 @@ export function CustomerAddModal({ isOpen, onClose, onAdd }: CustomerAddModalPro
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             />
           </div>
-          <div>
-            <Label>Paket Internet</Label>
-            <Input
-              placeholder="Nama paket (misal: 10 Mbps, 20 Mbps)"
-              value={formData.package_name}
-              onChange={(e) => setFormData({ ...formData, package_name: e.target.value })}
-            />
-          </div>
+
           <LocationPicker
             latitude={formData.latitude}
             longitude={formData.longitude}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, X, Edit, Trash2, Plus, Upload, ArrowRightLeft } from "lucide-react";
+import { Check, X, Edit, Trash2, Plus, Upload, ArrowRightLeft, MessageSquare } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { showSuccess, showError } from "@/utils/toast";
 import { CustomerEditModal } from "./customer-edit-modal";
@@ -151,10 +151,39 @@ export function CustomerList({
             <CardTitle>Daftar Tagihan Pelanggan</CardTitle>
             <div className="flex items-center gap-2">
               {selectedIds.length > 0 && (
-                <Button onClick={handleConfirmDeleteSelected} size="sm" variant="destructive">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Hapus ({selectedIds.length})
-                </Button>
+                <>
+                  <Button onClick={handleConfirmDeleteSelected} size="sm" variant="destructive">
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Hapus ({selectedIds.length})
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const selectedCustomers = customers.filter(c => selectedIds.includes(c.id));
+                      const unpaid = selectedCustomers.filter(c => c.status === 'pending');
+                      if (unpaid.length === 0) {
+                        showError('Pilih pelanggan yang belum bayar untuk dikirim tagihan.');
+                        return;
+                      }
+
+                      if (confirm(`Kirim tagihan WA ke ${unpaid.length} pelanggan? (Akan membuka tab baru untuk setiap pelanggan)`)) {
+                        unpaid.forEach((c, index) => {
+                          setTimeout(() => {
+                            const message = `Halo ${c.name}, mohon segera melakukan pembayaran tagihan internet sebesar Rp ${formatCurrency(c.amount)}. Terima kasih.`;
+                            const phone = c.phone_number?.replace(/^0/, '62') || '';
+                            if (phone) {
+                              window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+                            }
+                          }, index * 1000); // Delay 1s per tab to prevent browser blocking
+                        });
+                      }
+                    }}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Broadcast WA ({selectedIds.length})
+                  </Button>
+                </>
               )}
               <Button onClick={handleImportClick} size="sm" variant="outline">
                 <Upload className="h-4 w-4 mr-1" />

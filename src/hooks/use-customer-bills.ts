@@ -6,8 +6,8 @@ import { showSuccess, showError } from '@/utils/toast';
 // Helper function to parse dates from Supabase string format to Date objects
 const parseCustomerDates = (customer: any): CustomerBill => ({
   ...customer,
-      due_date: customer.due_date ? new Date(customer.due_date) : new Date(),
-    created_at: customer.created_at ? new Date(customer.created_at) : new Date(),
+  due_date: customer.due_date ? new Date(customer.due_date) : new Date(),
+  created_at: customer.created_at ? new Date(customer.created_at) : new Date(),
 });
 
 export const useCustomerBills = (tableName: string) => {
@@ -21,7 +21,7 @@ export const useCustomerBills = (tableName: string) => {
       return;
     }
     fetchCustomers();
-    
+
     // Subscribe to real-time changes for the selected table
     const channel = supabase
       .channel(`${tableName}-changes`)
@@ -109,7 +109,14 @@ export const useCustomerBills = (tableName: string) => {
           name: customer.name,
           amount: customer.amount,
           status: customer.status,
+          paymentMethod: customer.paymentMethod,
           notes: customer.notes,
+          phone_number: customer.phone_number,
+          address: customer.address,
+          package_name: customer.package_name,
+          latitude: customer.latitude,
+          longitude: customer.longitude,
+          photo_url: customer.photo_url,
           due_date: new Date().toISOString(), // Ensure ISO string for Supabase
           created_at: new Date().toISOString(), // Ensure ISO string for Supabase
         },
@@ -121,7 +128,7 @@ export const useCustomerBills = (tableName: string) => {
       console.error('Error adding customer:', error);
     } else {
       showSuccess('Pelanggan baru berhasil ditambahkan');
-      fetchCustomers(); 
+      fetchCustomers();
       return parseCustomerDates(data[0]);
     }
   };
@@ -133,7 +140,14 @@ export const useCustomerBills = (tableName: string) => {
         name: updates.name,
         amount: updates.amount,
         status: updates.status,
+        paymentMethod: updates.paymentMethod,
         notes: updates.notes,
+        phone_number: updates.phone_number,
+        address: updates.address,
+        package_name: updates.package_name,
+        latitude: updates.latitude,
+        longitude: updates.longitude,
+        photo_url: updates.photo_url,
         due_date: updates.due_date instanceof Date ? updates.due_date.toISOString() : undefined,
       })
       .eq('id', id)
@@ -144,7 +158,7 @@ export const useCustomerBills = (tableName: string) => {
       console.error('Error updating customer:', error);
     } else {
       showSuccess('Data pelanggan berhasil diperbarui');
-      fetchCustomers(); 
+      fetchCustomers();
       return parseCustomerDates(data[0]);
     }
   };
@@ -160,7 +174,7 @@ export const useCustomerBills = (tableName: string) => {
       console.error('Error deleting customer:', error);
     } else {
       showSuccess('Data pelanggan berhasil dihapus');
-      fetchCustomers(); 
+      fetchCustomers();
     }
   };
 
@@ -175,7 +189,7 @@ export const useCustomerBills = (tableName: string) => {
       console.error('Error deleting customers:', error);
     } else {
       showSuccess(`${ids.length} pelanggan berhasil dihapus`);
-      fetchCustomers(); 
+      fetchCustomers();
     }
   };
 
@@ -184,7 +198,14 @@ export const useCustomerBills = (tableName: string) => {
       name: customer.name,
       amount: customer.amount,
       status: customer.status,
+      paymentMethod: customer.paymentMethod,
       notes: customer.notes,
+      phone_number: customer.phone_number,
+      address: customer.address,
+      package_name: customer.package_name,
+      latitude: customer.latitude,
+      longitude: customer.longitude,
+      photo_url: customer.photo_url,
       due_date: new Date().toISOString(),
       created_at: new Date().toISOString(),
     }));
@@ -199,7 +220,7 @@ export const useCustomerBills = (tableName: string) => {
       console.error('Error importing customers:', error);
     } else {
       showSuccess(`${newCustomers.length} pelanggan berhasil diimpor`);
-      fetchCustomers(); 
+      fetchCustomers();
       return data.map(parseCustomerDates);
     }
   };

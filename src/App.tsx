@@ -47,7 +47,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
-    window.location.href = "https://zaidnetutama.vercel.app/"; // ✅ Tambahkan ini di sini
+    window.location.href = "https://zaidnetupdate-kmp7.vercel.app/"; // ✅ Updated redirect URL
   };
 
   return (
